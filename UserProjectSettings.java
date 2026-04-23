@@ -1,3 +1,5 @@
+import java.nio.file.Path;
+
 public class UserProjectSettings {
     // Shared data class used by backend and frontend.
     // Keep this file small to avoid merge conflicts.
@@ -8,8 +10,7 @@ public class UserProjectSettings {
     public String description;
     public boolean isPrivate;
 
-    public UserProjectSettings(String projectPath, String projectName, String repoName,
-            String description, boolean isPrivate) {
+    public UserProjectSettings(String projectPath, String projectName, String repoName, String description, boolean isPrivate) {
         this.projectPath = projectPath;
         this.projectName = projectName;
         this.repoName = repoName;

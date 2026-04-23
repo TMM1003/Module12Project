@@ -122,7 +122,7 @@ public class LocalRepoSetup {
         return projectName.trim();
     }
 
-    private void runCommand(Path workingDirectory, String... commandParts) {
+    public void runCommand(Path workingDirectory, String... commandParts) {
         ProcessBuilder processBuilder = new ProcessBuilder(commandParts);
         processBuilder.directory(workingDirectory.toFile());
         processBuilder.redirectErrorStream(true);
