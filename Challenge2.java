@@ -29,7 +29,9 @@ public class Challenge2 {
             gitHubRepoSetup.createInitialCommit(settings.projectPath);
 
             projectSetupGui.showStatusMessage("Creating the matching GitHub repository...");
-            GitHubRepoInfo repoInfo = gitHubRepoSetup.createGitHubRepoMirror(settings.repoName, settings.description,
+            GitHubRepoInfo repoInfo = gitHubRepoSetup.createGitHubRepoMirror(
+                    settings.repoName,
+                    settings.description,
                     settings.isPrivate);
 
             if (repoInfo == null || repoInfo.remoteUrl == null || repoInfo.remoteUrl.isBlank()
