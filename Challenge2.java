@@ -5,7 +5,7 @@ public class Challenge2 {
     public static void main(String[] args) {
         ProjectSetupGUI projectSetupGui = new ProjectSetupGUI();
         LocalRepoSetup localRepoSetup = new LocalRepoSetup();
-        GitHubRepoSetup gitHubRepoSetup = new GitHubRepoSetup();
+        GitHubRepoSetup gitHubRepoSetup = new GitHubRepoSetup("");
         RepoPublishManager repoPublishManager = new RepoPublishManager();
 
         projectSetupGui.launchGui();
