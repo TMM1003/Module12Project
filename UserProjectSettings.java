@@ -1,5 +1,3 @@
-import java.nio.file.Path;
-
 public class UserProjectSettings {
     // Shared data class used by backend and frontend.
     // Keep this file small to avoid merge conflicts.

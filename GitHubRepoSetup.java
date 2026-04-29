@@ -1,72 +1,70 @@
-import java.util.Arrays;
+import java.nio.file.Path;
 import git.tools.client.GitSubprocessClient;
 import github.tools.client.GitHubApiClient;
-
+import github.tools.client.RequestParams;
+import github.tools.responseObjects.CreateRepoResponse;
 
 public class GitHubRepoSetup {
 
-    private GitHubApiClient github;
+    private final GitHubApiClient github;
+    private final LocalRepoSetup localRepoSetup = new LocalRepoSetup();
 
-    // Constructor
-    public GitHubRepoSetup(String token) {
-        this.github = new GitHubApiClient(token);
+    public GitHubRepoSetup(String username, String token) {
+        String normalizedUsername = requireValue(username, "GitHub username");
+        String normalizedToken = requireValue(token, "GitHub token");
+        this.github = new GitHubApiClient(normalizedUsername, normalizedToken);
     }
 
-    // Create initial commit
-    public void createInitialCommit(String projectPath){
-        GitSubprocessClient git = new GitSubprocessClient(projectPath);
+    public void createInitialCommit(String projectPath) {
+        String normalizedProjectPath = requireValue(projectPath, "Project path");
+        GitSubprocessClient git = new GitSubprocessClient(normalizedProjectPath);
+        String pendingChanges = git.runGitCommand("status --porcelain").trim();
 
-        git.runCommand("git add .");
-        git.runCommand("git commit -m \"Initial commit\"");
+        if (pendingChanges.isBlank()) {
+            return;
+        }
+
+        Path projectDirectory = Path.of(normalizedProjectPath).toAbsolutePath().normalize();
+        localRepoSetup.runCommand(projectDirectory, "git", "add", ".");
+        localRepoSetup.runCommand(projectDirectory, "git", "commit", "-m", "Initial commit");
     }
 
-    // Create GitHub repo
     public GitHubRepoInfo createGitHubRepoMirror(String repoName, String description, boolean isPrivate) {
+        String normalizedRepoName = requireValue(repoName, "Repository name").replaceAll("\\s+", "-");
+        String normalizedDescription = description == null ? "" : description.trim();
 
-        try {
-            if (repoName == null || repoName.trim().isEmpty()) {
-                System.out.println("Repo name cannot be empty.");
-                return null;
-            }
+        RequestParams requestParams = new RequestParams();
+        requestParams.addParam("name", normalizedRepoName);
+        requestParams.addParam("description", normalizedDescription);
+        requestParams.addParam("private", isPrivate);
 
-            repoName = repoName.trim().replaceAll(" ", "-");
-            
-            String repoUrl = github.createRepo(repoName, description, isPrivate);
+        CreateRepoResponse response = github.createRepo(requestParams);
+        String repoFullName = requireValue(response.getRepoFullName(), "GitHub repository full name");
+        String browserUrl = requireValue(response.getUrl(), "GitHub repository URL");
+        String remoteUrl = "https://github.com/" + repoFullName + ".git";
 
-            System.out.println("GitHub repo created: " + repoUrl);
-
-            GitHubRepoInfo info = new GitHubRepoInfo("", "");
-            info.setRemoteUrl(repoUrl);
-
-            String browserUrl = repoUrl.replace(".git", "");
-            info.setBrowserUrl(browserUrl);
-
-            return info;
-
-        } catch (Exception e) {
-            System.out.println("Something went wrong creating the GitHub repo.");
-            return null;
-        }
+        return new GitHubRepoInfo(remoteUrl, browserUrl);
     }
 
-    // Set remote origin
     public void setOriginRemote(String projectPath, String remoteUrl) {
+        String normalizedProjectPath = requireValue(projectPath, "Project path");
+        String normalizedRemoteUrl = requireValue(remoteUrl, "Remote URL");
+        Path projectDirectory = Path.of(normalizedProjectPath).toAbsolutePath().normalize();
 
         try {
-            GitSubprocessClient git = new GitSubprocessClient(projectPath);
-            git.runCommand("git remote add origin " + remoteUrl);
-
-        } catch (Exception e) {
-            System.out.println("Origin may already exist. Trying to reset it...");
-
-            try {
-                GitSubprocessClient git = new GitSubprocessClient(projectPath);
-                git.runCommand("git remote remove origin");
-                git.runCommand("git remote add origin " + remoteUrl);
-
-            } catch (Exception ex) {
-                System.out.println("Something went wrong setting the remote.");
-            }
+            localRepoSetup.runCommand(projectDirectory, "git", "remote", "remove", "origin");
+        } catch (IllegalStateException ignored) {
+            // Removing a missing origin is safe to ignore before adding the new one.
         }
+
+        localRepoSetup.runCommand(projectDirectory, "git", "remote", "add", "origin", normalizedRemoteUrl);
+    }
+
+    private String requireValue(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " is required.");
+        }
+
+        return value.trim();
     }
 }

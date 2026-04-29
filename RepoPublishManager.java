@@ -1,26 +1,55 @@
 import git.tools.client.GitSubprocessClient;
-import github.tools.client.GitHubApiClient;
-import github.tools.responseObjects.*;
 import java.nio.file.Path;
-import java.nio.*;
+
 public class RepoPublishManager {
-    public LocalRepoSetup c;
-    // Kenneth
-    public void pushInitialCommit(Path projectPath) {
-        // TODO Kenneth:
-        // Push the initial commit to the GitHub repo.
-        // Example work to add later:
-        // - Run git push -u origin main
-        c.runCommand(projectPath, "git add .", "git commit 'Initial Commit'", "git push origin main");
-        // - Handle branch-name differences if needed
+    private final LocalRepoSetup localRepoSetup = new LocalRepoSetup();
+
+    public void pushInitialCommit(String projectPath) {
+        if (projectPath == null || projectPath.isBlank()) {
+            throw new IllegalArgumentException("Project path is required.");
+        }
+
+        Path projectDirectory = Path.of(projectPath).toAbsolutePath().normalize();
+        GitSubprocessClient git = new GitSubprocessClient(projectDirectory.toString());
+        String branchName = sanitizeBranchName(git.runGitCommand("branch --show-current"));
+
+        if (branchName == null) {
+            branchName = sanitizeBranchName(git.getCurrentBranchName());
+        }
+
+        if (branchName == null) {
+            throw new IllegalStateException("Unable to determine the current Git branch.");
+        }
+
+        localRepoSetup.runCommand(projectDirectory, "git", "push", "-u", "origin", branchName);
     }
 
     public String giveUserRepoUrl(String repoUrl) {
-        // TODO Kenneth:
-        // Give the user the URL to their newly created GitHub repo.
-        return repoUrl;
-        // Example work to add later:
-        // - Print the URL
-        // - Return or store the URL for the GUI layer
+        if (repoUrl == null || repoUrl.isBlank()) {
+            throw new IllegalArgumentException("Repository URL is required.");
+        }
+
+        return repoUrl.trim();
+    }
+
+    private String sanitizeBranchName(String rawBranchName) {
+        if (rawBranchName == null) {
+            return null;
+        }
+
+        String normalizedBranchName = rawBranchName.trim();
+        if (normalizedBranchName.isBlank()
+                || normalizedBranchName.contains("fatal:")
+                || normalizedBranchName.contains("error:")
+                || normalizedBranchName.equals("undefined")) {
+            return null;
+        }
+
+        int lineBreakIndex = normalizedBranchName.indexOf(System.lineSeparator());
+        if (lineBreakIndex >= 0) {
+            normalizedBranchName = normalizedBranchName.substring(0, lineBreakIndex).trim();
+        }
+
+        return normalizedBranchName.isBlank() ? null : normalizedBranchName;
     }
 }

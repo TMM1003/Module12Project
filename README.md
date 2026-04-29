@@ -1,8 +1,8 @@
 # CSC109 Module 12 Project
 
-This project is a Java skeleton for a CSC109 Module 12 group assignment. The goal of the program is to guide or automate the setup of a local project as a Git repository, connect it to a new GitHub repository, push the initial commit, and provide the user with the final repository URL.
+This project is a Java project for a CSC109 Module 12 group assignment. The goal of the program is to guide or automate the setup of a local project as a Git repository, connect it to a new GitHub repository, push the initial commit, and provide the user with the final repository URL.
 
-The current codebase is intentionally only a skeleton. The project is split across multiple `.java` files so each group member can work in a separate area with fewer merge conflicts.
+The codebase is split across multiple `.java` files so each group member can work in a separate area with fewer merge conflicts.
 
 ## Objective
 
@@ -19,7 +19,7 @@ The finished program is intended to support these 8 project tasks:
 
 ## Current Scope
 
-The project currently provides method stubs only. No project logic has been implemented yet.
+The project now includes an implemented GUI flow plus backend logic for local Git setup, GitHub repo creation, remote configuration, and pushing the first commit.
 
 The work is organized so the 8 required Git and GitHub tasks are split across 3 backend developers, while the 4th teammate focuses on the GUI:
 
@@ -45,22 +45,32 @@ The work is organized so the 8 required Git and GitHub tasks are split across 3 
 ## Requirements
 
 - A Java Development Kit (JDK) installed
+- Git installed and available on your `PATH`
 - A terminal or IDE capable of compiling and running Java programs
+- These external JAR files:
+  - `\ExternalJars\GitHubApiClient-v0.0.7.jar`
+  - `\ExternalJars\GitSubprocessClient-v0.0.12.jar`
+- GitHub credentials supplied through either environment variables or a local `.env` file:
+
+```text
+GITHUB_USERNAME=your-github-username
+GITHUB_TOKEN=your-github-token
+```
 
 ## How to Run
 
 Compile the project:
 
 ```bash
-javac Challenge2.java LocalRepoSetup.java GitHubRepoSetup.java RepoPublishManager.java ProjectSetupGUI.java UserProjectSettings.java GitHubRepoInfo.java
+javac -cp ".;<path-to-jars>/GitHubApiClient-v0.0.7.jar;<path-to-jars>/GitSubprocessClient-v0.0.12.jar" Challenge2.java LocalRepoSetup.java GitHubRepoSetup.java RepoPublishManager.java ProjectSetupGUI.java UserProjectSettings.java GitHubRepoInfo.java
 ```
 
 Run the program:
 
 ```bash
-java Challenge2
+java -cp ".;<path-to-jars>/GitHubApiClient-v0.0.7.jar;<path-to-jars>/GitSubprocessClient-v0.0.12.jar" Challenge2
 ```
 
 ## Current Status
 
-The project compiles, but `main`, the backend helper methods, and the GUI methods are still placeholders. The group will fill in the implementation later.
+The project now includes working local Git setup, GitHub repository creation, origin configuration, and push wiring. The final result still depends on valid GitHub credentials and a machine that is already able to authenticate Git pushes to GitHub over HTTPS.
