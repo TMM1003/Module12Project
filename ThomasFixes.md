@@ -2,7 +2,7 @@
 
 This is a summary of how I fixed the project, step by step, from when I first checked the code to when I got it compiling again.
 
-## What Thomas Fixed (4/28/26)
+## What I (Thomas) Fixed (4/28/26)
 
 1. I started by compiling the project so I could see the real errors instead of guessing. That showed me the project had missing dependency issues, API mismatches, and broken wiring between classes.
 
